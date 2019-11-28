@@ -1,11 +1,8 @@
 #pragma once
 
-#include "firebase/analytics.h"
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AnalyticsBlueprintFunctionLibrary.generated.h"
-
-using namespace firebase::analytics;
 
 USTRUCT(BlueprintType)
 struct FParametersStorage
@@ -13,7 +10,7 @@ struct FParametersStorage
 	GENERATED_BODY()
 
 	FParametersStorage() {}
-	TArray<Parameter> Parameters;
+	//TArray<Parameter> Parameters;
 };
 
 UCLASS()
@@ -30,11 +27,25 @@ public:
 	 *	@param AppID	App ID used to uniquely identify an instance of an app.
 	 */
 	UFUNCTION(BlueprintCallable)
-	static void Initialize(FString AppKey, FString AppID, FString ProjectID, FString StorageBucket);
+	static void Initialize(FString ApplicationID, FString APIKey,
+						   FString DatabaseURL, FString SenderID,
+						   FString StorageBucket, FString ProjectID);
 
 	/** Initialize the Analytics API. */
 	UFUNCTION(BlueprintCallable)
 	static void InitializeFromConfig();
+
+	/** Log an event with associated parameters.
+	 *  @param EventName	Name of the event to log. Should contain 1 to 40 alphanumeric characters
+	 *  					or underscores. The name must start with an alphabetic character. Some
+	 *  					event names are reserved. See Analytics Events (https://firebase.google.com/
+	 *  					docs/reference/cpp/group/event-names.html#group__event__names) for the list
+	 *  					of reserved event names. The "firebase_" prefix is reserved and should not
+	 *  					be used. Note that event names are case-sensitive and that logging two events
+	 *  					whose names differ only in case will result in two distinct events.
+	 */
+	UFUNCTION(BlueprintCallable)
+	static void LogEvent(FString EventName);
 
 	/** Log an event with one string parameter.
 	 *  @param EventName		Name of the event to log. Should contain 1 to 40 alphanumeric characters
@@ -92,18 +103,6 @@ public:
 	 *  					of reserved event names. The "firebase_" prefix is reserved and should not
 	 *  					be used. Note that event names are case-sensitive and that logging two events
 	 *  					whose names differ only in case will result in two distinct events.
-	 */
-	UFUNCTION(BlueprintCallable)
-	static void LogEvent(FString EventName);
-
-	/** Log an event with associated parameters.
-	 *  @param EventName	Name of the event to log. Should contain 1 to 40 alphanumeric characters
-	 *  					or underscores. The name must start with an alphabetic character. Some
-	 *  					event names are reserved. See Analytics Events (https://firebase.google.com/
-	 *  					docs/reference/cpp/group/event-names.html#group__event__names) for the list
-	 *  					of reserved event names. The "firebase_" prefix is reserved and should not
-	 *  					be used. Note that event names are case-sensitive and that logging two events
-	 *  					whose names differ only in case will result in two distinct events.
 	 *
 	 *  @param Parameters	Array of FParameter structures.
 	 */
@@ -145,10 +144,6 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable)
 	static void SetUserProperty(FString PropertyName, FString PropertyValue);
-
-	/** Terminate the Analytics API. */
-	UFUNCTION(BlueprintCallable)
-	static void Terminate();
 
 	/** Add a string parameter to ParametersStorage.
 	*  @param ParameterName	Name of the parameter to log.
