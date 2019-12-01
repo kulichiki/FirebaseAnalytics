@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+
+  <prebuildCopies>
+    <copyFile src="$S(PluginDir)/../../../../Build/Android/google-services.json" dst="$S(BuildDir)/gradle/app/google-services.json"/>
+  </prebuildCopies>
   
-  <proguardAdditions>
-	<insert>
-	  ########################################################################################## Amazon
-	  -dontwarn com.google.firebase.**
-	  -keep class com.google.firebase.** {*;}
-	</insert>
-  </proguardAdditions>
 
   <androidManifestUpdates>
     <addElements tag="application">
       <provider
         android:name="com.google.firebase.provider.FirebaseInitProvider"
         android:authorities="${applicationId}.firebaseinitprovider"
-        tools:node="remove"
-      />
+        tools:node="remove" />
     </addElements>
+    <addPermission android:name="android.permission.INTERNET" />
   </androidManifestUpdates>
   
 	<AARImports>
@@ -27,28 +24,18 @@
     <insertNewline/>
 	</AARImports>
 
-  <androidManifestUpdates>
-    <addPermission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <addPermission android:name="android.permission.INTERNET" />
-  </androidManifestUpdates>
-
   <buildscriptGradleAdditions>
     <insert>
       dependencies
       {
-      classpath 'com.google.gms:google-services:4.0.0'
+        classpath 'com.google.gms:google-services:4.0.0'
       }
     </insert>
   </buildscriptGradleAdditions>
 
   <buildGradleAdditions>
     <insertValue value="apply plugin: 'com.google.gms.google-services'"/>
-    <insertNewline/>
   </buildGradleAdditions>
-
-  <prebuildCopies>
-    <copyFile src="$S(PluginDir)/../../../../Build/Android/google-services.json" dst="$S(BuildDir)/gradle/app/google-services.json"/>
-  </prebuildCopies>
 
   <gameActivityImportAdditions>
     <insert>
