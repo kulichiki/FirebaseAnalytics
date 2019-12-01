@@ -1,14 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<root xmlns:android="http://schemas.android.com/apk/res/android">
+<root xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+  
+  <proguardAdditions>
+	<insert>
+	  ########################################################################################## Amazon
+	  -dontwarn com.google.firebase.**
+	  -keep class com.google.firebase.** {*;}
+	</insert>
+  </proguardAdditions>
+
+  <androidManifestUpdates>
+    <addElements tag="application">
+      <provider
+        android:name="com.google.firebase.provider.FirebaseInitProvider"
+        android:authorities="${applicationId}.firebaseinitprovider"
+        tools:node="remove"
+      />
+    </addElements>
+  </androidManifestUpdates>
   
 	<AARImports>
 		<insertValue value="com.google.firebase,firebase-analytics,11.8.0" />
+    <insertNewline/>
+    
+    <insertValue value="com.google.firebase,firebase-core,11.8.0" />
+    <insertNewline/>
 	</AARImports>
 
   <androidManifestUpdates>
     <addPermission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <addPermission android:name="android.permission.INTERNET" />
   </androidManifestUpdates>
+
+  <buildscriptGradleAdditions>
+    <insert>
+      dependencies
+      {
+      classpath 'com.google.gms:google-services:4.0.0'
+      }
+    </insert>
+  </buildscriptGradleAdditions>
+
+  <buildGradleAdditions>
+    <insertValue value="apply plugin: 'com.google.gms.google-services'"/>
+    <insertNewline/>
+  </buildGradleAdditions>
+
+  <prebuildCopies>
+    <copyFile src="$S(PluginDir)/../../../../Build/Android/google-services.json" dst="$S(BuildDir)/gradle/app/google-services.json"/>
+  </prebuildCopies>
 
   <gameActivityImportAdditions>
     <insert>
@@ -34,6 +74,7 @@
                                                  .setStorageBucket(StorageBucket)
                                                  .setProjectId(ProjectID);
         FirebaseApp.initializeApp(this, OptionsBuilder.build());
+        Analytics = FirebaseAnalytics.getInstance(this);
       }
 
       public void AndroidThunkJava_LogEvent(String EventName)
