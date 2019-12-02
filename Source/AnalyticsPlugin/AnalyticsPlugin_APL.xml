@@ -5,7 +5,6 @@
     <copyFile src="$S(PluginDir)/../../../../Build/Android/google-services.json" dst="$S(BuildDir)/gradle/app/google-services.json"/>
   </prebuildCopies>
   
-
   <androidManifestUpdates>
     <addElements tag="application">
       <provider
@@ -90,10 +89,11 @@
         Parameters.putInt(ParameterName, ParameterValue);
         Analytics.logEvent(EventName, Parameters);
       }
-
-      ///
-      // With Parameters
-      //
+      
+      public void AndroidThunkJava_LogEventWithParameters(String EventName, Bundle Parameters)
+      {
+        Analytics.logEvent(EventName, Parameters);
+      }
 
       public void AndroidThunkJava_ResetAnalyticsData()
       {

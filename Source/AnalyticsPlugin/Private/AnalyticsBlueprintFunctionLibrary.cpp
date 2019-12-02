@@ -19,9 +19,9 @@ void UAnalyticsBlueprintFunctionLibrary::Initialize(FString ApplicationID, FStri
 		jstring JStorageBucket = Env->NewStringUTF(TCHAR_TO_UTF8(*StorageBucket));
 		jstring JProjectID	   = Env->NewStringUTF(TCHAR_TO_UTF8(*ProjectID));
 
-		static jmethodID Method = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_Initialize", 
+		static jmethodID JMethodID = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_Initialize", 
 		"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
-		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, Method, JApplicationID, JAPIKey,
+		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, JMethodID, JApplicationID, JAPIKey,
 																				  JDatabaseURL, JSenderID,
 																				  JStorageBucket, JProjectID);
 
@@ -52,8 +52,8 @@ void UAnalyticsBlueprintFunctionLibrary::LogEvent(FString EventName)
 	{
 		jstring JEventName = Env->NewStringUTF(TCHAR_TO_UTF8(*EventName));
 
-		static jmethodID Method = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_LogEvent", "(Ljava/lang/String;)V", false);
-		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, Method, JEventName);
+		static jmethodID JMethodID = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_LogEvent", "(Ljava/lang/String;)V", false);
+		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, JMethodID, JEventName);
 
 		Env->DeleteLocalRef(JEventName);
 	}
@@ -69,8 +69,8 @@ void UAnalyticsBlueprintFunctionLibrary::LogEventWithStringParameter(FString Eve
 		jstring JParameterName	= Env->NewStringUTF(TCHAR_TO_UTF8(*ParameterName));
 		jstring JParameterValue = Env->NewStringUTF(TCHAR_TO_UTF8(*ParameterValue));
 
-		static jmethodID Method = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_LogEventWithParameter", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
-		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, Method, JEventName, JParameterName, JParameterValue);
+		static jmethodID JMethodID = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_LogEventWithParameter", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
+		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, JMethodID, JEventName, JParameterName, JParameterValue);
 
 		Env->DeleteLocalRef(JEventName);
 		Env->DeleteLocalRef(JParameterName);
@@ -87,8 +87,8 @@ void UAnalyticsBlueprintFunctionLibrary::LogEventWithFloatParameter(FString Even
 		jstring JEventName = Env->NewStringUTF(TCHAR_TO_UTF8(*EventName));
 		jstring JParameterName = Env->NewStringUTF(TCHAR_TO_UTF8(*ParameterName));
 
-		static jmethodID Method = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_LogEventWithParameter", "(Ljava/lang/String;Ljava/lang/String;F)V", false);
-		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, Method, JEventName, JParameterName, ParameterValue);
+		static jmethodID JMethodID = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_LogEventWithParameter", "(Ljava/lang/String;Ljava/lang/String;F)V", false);
+		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, JMethodID, JEventName, JParameterName, ParameterValue);
 
 		Env->DeleteLocalRef(JEventName);
 		Env->DeleteLocalRef(JParameterName);
@@ -104,8 +104,8 @@ void UAnalyticsBlueprintFunctionLibrary::LogEventWithIntegerParameter(FString Ev
 		jstring JEventName = Env->NewStringUTF(TCHAR_TO_UTF8(*EventName));
 		jstring JParameterName = Env->NewStringUTF(TCHAR_TO_UTF8(*ParameterName));
 
-		static jmethodID Method = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_LogEventWithParameter", "(Ljava/lang/String;Ljava/lang/String;I)V", false);
-		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, Method, JEventName, JParameterName, ParameterValue);
+		static jmethodID JMethodID = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_LogEventWithParameter", "(Ljava/lang/String;Ljava/lang/String;I)V", false);
+		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, JMethodID, JEventName, JParameterName, ParameterValue);
 
 		Env->DeleteLocalRef(JEventName);
 		Env->DeleteLocalRef(JParameterName);
@@ -113,10 +113,54 @@ void UAnalyticsBlueprintFunctionLibrary::LogEventWithIntegerParameter(FString Ev
 #endif
 }
 
-void UAnalyticsBlueprintFunctionLibrary::LogEventWithParameters(FString EventName, UPARAM(ref) FParametersStorage& ParametersStorage)
+void UAnalyticsBlueprintFunctionLibrary::LogEventWithParameters(FString EventName, UPARAM(ref) FBundle& Bundle)
 {
-	//TArray<Parameter>& Parameters = ParametersStorage.Parameters;
-	//analytics::LogEvent(TCHAR_TO_ANSI(*EventName), Parameters.GetData(), Parameters.Num());
+#if PLATFORM_ANDROID
+	if (JNIEnv* Env = FAndroidApplication::GetJavaEnv())
+	{
+		// Initialize Bundle
+		jclass JBundleClass = Env->FindClass("android/os/Bundle");
+		jmethodID JBundleConstructor = Env->GetMethodID(JBundleClass, "<init>", "()V");
+		jobject JBundle = Env->NewObject(JBundleClass, JBundleConstructor);
+		static jmethodID JPutStringMethodID = FJavaWrapper::FindMethod(Env, JBundleClass, "putString", "(Ljava/lang/String;Ljava/lang/String;)V", false);
+		static jmethodID JPutFloatMethodID = FJavaWrapper::FindMethod(Env, JBundleClass, "putFloat", "(Ljava/lang/String;F)V", false);
+		static jmethodID JPutIntegerMethodID = FJavaWrapper::FindMethod(Env, JBundleClass, "putInt", "(Ljava/lang/String;I)V", false);
+		
+		for (auto& Parameter : Bundle.StringParameters)
+		{
+			jstring ParameterName = Env->NewStringUTF(TCHAR_TO_UTF8(*Parameter.Key));
+			jstring ParameterValue = Env->NewStringUTF(TCHAR_TO_UTF8(*Parameter.Value));
+			FJavaWrapper::CallVoidMethod(Env, JBundle, JPutStringMethodID, ParameterName, ParameterValue);
+		
+			Env->DeleteLocalRef(ParameterName);
+			Env->DeleteLocalRef(ParameterValue);
+		}
+		
+		for (auto& Parameter : Bundle.FloatParameters)
+		{
+			jstring ParameterName = Env->NewStringUTF(TCHAR_TO_UTF8(*Parameter.Key));
+			FJavaWrapper::CallVoidMethod(Env, JBundle, JPutFloatMethodID, ParameterName, Parameter.Value);
+		
+			Env->DeleteLocalRef(ParameterName);
+		}
+		
+		for (auto& Parameter : Bundle.IntegerParameters)
+		{
+			jstring ParameterName = Env->NewStringUTF(TCHAR_TO_UTF8(*Parameter.Key));
+			FJavaWrapper::CallVoidMethod(Env, JBundle, JPutIntegerMethodID, ParameterName, Parameter.Value);
+		
+			Env->DeleteLocalRef(ParameterName);
+		}
+		
+		jstring JEventName = Env->NewStringUTF(TCHAR_TO_UTF8(*EventName));
+		
+		static jmethodID JMethodID = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_LogEventWithParameters", "(Ljava/lang/String;Landroid/os/Bundle;)V", false);
+		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, JMethodID, JEventName, JBundle);
+		
+		Env->DeleteLocalRef(JBundle);
+		Env->DeleteLocalRef(JEventName);
+	}
+#endif
 }
 
 void UAnalyticsBlueprintFunctionLibrary::ResetAnalyticsData()
@@ -124,8 +168,8 @@ void UAnalyticsBlueprintFunctionLibrary::ResetAnalyticsData()
 #if PLATFORM_ANDROID
 	if (JNIEnv* Env = FAndroidApplication::GetJavaEnv())
 	{
-		static jmethodID Method = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_ResetAnalyticsData", "()V", false);
-		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, Method);
+		static jmethodID JMethodID = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_ResetAnalyticsData", "()V", false);
+		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, JMethodID);
 	}
 #endif
 }
@@ -135,8 +179,8 @@ void UAnalyticsBlueprintFunctionLibrary::SetAnalyticsCollectionEnabled(bool Enab
 #if PLATFORM_ANDROID
 	if (JNIEnv* Env = FAndroidApplication::GetJavaEnv())
 	{
-		static jmethodID Method = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_SetAnalyticsCollectionEnabled", "(Z)V", false);
-		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, Method, Enabled);
+		static jmethodID JMethodID = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_SetAnalyticsCollectionEnabled", "(Z)V", false);
+		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, JMethodID, Enabled);
 	}
 #endif
 }
@@ -146,8 +190,8 @@ void UAnalyticsBlueprintFunctionLibrary::SetSessionTimeoutDuration(int Milliseco
 #if PLATFORM_ANDROID
 	if (JNIEnv* Env = FAndroidApplication::GetJavaEnv())
 	{
-		static jmethodID Method = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_SetSessionTimeoutDuration", "(I)V", false);
-		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, Method, Milliseconds);
+		static jmethodID JMethodID = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_SetSessionTimeoutDuration", "(I)V", false);
+		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, JMethodID, Milliseconds);
 	}
 #endif
 }
@@ -159,8 +203,8 @@ void UAnalyticsBlueprintFunctionLibrary::SetUserID(FString UserID)
 	{
 		jstring JUserID = Env->NewStringUTF(TCHAR_TO_UTF8(*UserID));
 		
-		static jmethodID Method = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_SetUserID", "(Ljava/lang/String;)V", false);
-		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, Method, JUserID);
+		static jmethodID JMethodID = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_SetUserID", "(Ljava/lang/String;)V", false);
+		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, JMethodID, JUserID);
 
 		Env->DeleteLocalRef(JUserID);
 	}
@@ -175,8 +219,8 @@ void UAnalyticsBlueprintFunctionLibrary::SetUserProperty(FString PropertyName, F
 		jstring JPropertyName  = Env->NewStringUTF(TCHAR_TO_UTF8(*PropertyName));
 		jstring JPropertyValue = Env->NewStringUTF(TCHAR_TO_UTF8(*PropertyValue));
 
-		static jmethodID Method = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_SetUserProperty", "()V", false);
-		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, Method, JPropertyName, JPropertyValue);
+		static jmethodID JMethodID = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_SetUserProperty", "(Ljava/lang/String;Ljava/lang/String;)V", false);
+		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, JMethodID, JPropertyName, JPropertyValue);
 
 		Env->DeleteLocalRef(JPropertyName);
 		Env->DeleteLocalRef(JPropertyValue);
@@ -184,23 +228,17 @@ void UAnalyticsBlueprintFunctionLibrary::SetUserProperty(FString PropertyName, F
 #endif
 }
 
-void UAnalyticsBlueprintFunctionLibrary::AddStringParameter(UPARAM(ref) FParametersStorage& ParametersStorage, 
-															FString ParameterName, 
-															FString ParameterValue)
+void UAnalyticsBlueprintFunctionLibrary::PutString(UPARAM(ref) FBundle& Bundle, FString ParameterName, FString ParameterValue)
 {
-	//ParametersStorage.Parameters.Add(Parameter(TCHAR_TO_ANSI(*ParameterName), TCHAR_TO_ANSI(*ParameterValue)));
+	Bundle.StringParameters.Add(ParameterName, ParameterValue);
 }
 
-void UAnalyticsBlueprintFunctionLibrary::AddFloatParameter(UPARAM(ref) FParametersStorage& ParametersStorage, 
-														   FString ParameterName, 
-														   float ParameterValue)
+void UAnalyticsBlueprintFunctionLibrary::PutFloat(UPARAM(ref) FBundle& Bundle, FString ParameterName, float ParameterValue)
 {
-	//ParametersStorage.Parameters.Add(Parameter(TCHAR_TO_ANSI(*ParameterName), (double)ParameterValue));
+	Bundle.FloatParameters.Add(ParameterName, ParameterValue);
 }
 
-void UAnalyticsBlueprintFunctionLibrary::AddIntegerParameter(UPARAM(ref) FParametersStorage& ParametersStorage, 
-															 FString ParameterName, 
-															 int ParameterValue)
+void UAnalyticsBlueprintFunctionLibrary::PutInteger(UPARAM(ref) FBundle& Bundle, FString ParameterName, int ParameterValue)
 {
-	//ParametersStorage.Parameters.Add(Parameter(TCHAR_TO_ANSI(*ParameterName), ParameterValue));
+	Bundle.IntegerParameters.Add(ParameterName, ParameterValue);
 }

@@ -5,12 +5,15 @@
 #include "AnalyticsBlueprintFunctionLibrary.generated.h"
 
 USTRUCT(BlueprintType)
-struct FParametersStorage
+struct FBundle
 {
 	GENERATED_BODY()
 
-	FParametersStorage() {}
-	//TArray<Parameter> Parameters;
+	FBundle() {}
+
+	TMap<FString, FString> StringParameters;
+	TMap<FString, float> FloatParameters;
+	TMap<FString, int> IntegerParameters;
 };
 
 UCLASS()
@@ -19,9 +22,6 @@ class UAnalyticsBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	// GetAnalyticsInstanceId()
-	// GetAnalyticsInstanceIdLastResult()
-
 	/** Initialize the Analytics API.
 	 *	@param AppKey	API key used to authenticate requests from your app.
 	 *	@param AppID	App ID used to uniquely identify an instance of an app.
@@ -107,7 +107,7 @@ public:
 	 *  @param Parameters	Array of FParameter structures.
 	 */
 	UFUNCTION(BlueprintCallable)
-	static void LogEventWithParameters(FString EventName, UPARAM(ref) FParametersStorage& Parameters);
+	static void LogEventWithParameters(FString EventName, UPARAM(ref) FBundle& Bundle);
 
 	/** Clears all analytics data for this app from the device and resets the app instance id. */
 	UFUNCTION(BlueprintCallable)
@@ -145,27 +145,27 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static void SetUserProperty(FString PropertyName, FString PropertyValue);
 
-	/** Add a string parameter to ParametersStorage.
+	/** Add a string parameter to Bundle.
 	*  @param ParameterName	Name of the parameter to log.
 	*
 	*  @param ParameterValue	Value of the parameter to log.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "Parameters Storage")
-	static void AddStringParameter(UPARAM(ref) FParametersStorage& ParametersStorage, FString ParameterName, FString ParameterValue);
-
-	/** Add a floating point parameter to ParametersStorage.
+	UFUNCTION(BlueprintCallable, Category = "Bundle")
+	static void PutString(UPARAM(ref) FBundle& Bundle, FString ParameterName, FString ParameterValue);
+	
+	/** Add a floating point parameter to Bundle.
 	 *  @param ParameterName	Name of the parameter to log.
 	 *
 	 *  @param ParameterValue	Value of the parameter to log.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Parameters Storage")
-	static void AddFloatParameter(UPARAM(ref) FParametersStorage& ParametersStorage, FString ParameterName, float ParameterValue);
-
-	/** Add a integer parameter to ParametersStorage.
+	UFUNCTION(BlueprintCallable, Category = "Bundle")
+	static void PutFloat(UPARAM(ref) FBundle& Bundle, FString ParameterName, float ParameterValue);
+	
+	/** Add a integer parameter to Bundle.
 	 *  @param ParameterName	Name of the parameter to log.
 	 *
 	 *  @param ParameterValue	Value of the parameter to log.
 	 */
-	UFUNCTION(BlueprintCallable, Category="Parameters Storage")
-	static void AddIntegerParameter(UPARAM(ref) FParametersStorage& ParametersStorage, FString ParameterName, int ParameterValue);
+	UFUNCTION(BlueprintCallable, Category="Bundle")
+	static void PutInteger(UPARAM(ref) FBundle& Bundle, FString ParameterName, int ParameterValue);
 };
