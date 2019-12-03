@@ -62,6 +62,12 @@
         FirebaseApp.initializeApp(this, OptionsBuilder.build());
         Analytics = FirebaseAnalytics.getInstance(this);
       }
+      
+      public void AndroidThunkJava_Initialize()
+      {
+        FirebaseApp.initializeApp(this);
+        Analytics = FirebaseAnalytics.getInstance(this);
+      }
 
       public void AndroidThunkJava_LogEvent(String EventName)
       {

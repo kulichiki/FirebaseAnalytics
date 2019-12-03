@@ -41,6 +41,8 @@ void UAnalyticsBlueprintFunctionLibrary::InitializeFromConfig()
 
 	if (JNIEnv* Env = FAndroidApplication::GetJavaEnv())
 	{
+		static jmethodID JMethodID = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, "AndroidThunkJava_Initialize", "()V", false);
+		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, JMethodID);
 	}
 #endif
 }
