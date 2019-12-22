@@ -1,9 +1,9 @@
 using UnrealBuildTool;
 using System.IO;
 
-public class AnalyticsPlugin : ModuleRules
+public class FirebaseAnalytics : ModuleRules
 {
-    public AnalyticsPlugin(ReadOnlyTargetRules Target) : base(Target)
+    public FirebaseAnalytics(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine" });
@@ -12,10 +12,7 @@ public class AnalyticsPlugin : ModuleRules
         if (Target.Platform == UnrealTargetPlatform.Android)
         {
             PrivateDependencyModuleNames.Add("Launch");
-            AdditionalPropertiesForReceipt.Add("AndroidPlugin", System.IO.Path.Combine(PluginPath, "AnalyticsPlugin_APL.xml"));
-        }
-        else if (Target.Platform == UnrealTargetPlatform.IOS)
-        {
+            AdditionalPropertiesForReceipt.Add("AndroidPlugin", System.IO.Path.Combine(PluginPath, "FirebaseAnalytics_UPL_Android.xml"));
         }
     }
 }

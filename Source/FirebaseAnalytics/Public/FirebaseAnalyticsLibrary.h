@@ -2,73 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "AnalyticsBlueprintFunctionLibrary.generated.h"
-
-UENUM(BlueprintType, Category = "FirebaseAnalytics")
-enum class EReservedParametersEnum : uint8
-{
-	ACHIEVEMENT_ID 		UMETA(DisplayName = "AchievementID"),
-	CHARACTER			UMETA(DisplayName = "Character"),
-	TRAVEL_CLASS		UMETA(DisplayName = "TravelClass"),
-	CONTENT_TYPE		UMETA(DisplayName = "ContentType"),
-	CURRENCY			UMETA(DisplayName = "Currency"),
-	COUPON				UMETA(DisplayName = "Coupon"),
-	START_DATE			UMETA(DisplayName = "StartDate"),
-	END_DATE			UMETA(DisplayName = "EndDate"),
-	EXTEND_SESSION		UMETA(DisplayName = "ExtendSession"),
-	FLIGHT_NUMBER		UMETA(DisplayName = "FlightNumber"),
-	GROUP_ID			UMETA(DisplayName = "GroupID"),
-	ITEM_CATEGORY		UMETA(DisplayName = "ItemCategory"),
-	ITEM_ID				UMETA(DisplayName = "ItemID"),
-	ITEM_LOCATION_ID	UMETA(DisplayName = "ItemLocationID"),
-	ITEM_NAME			UMETA(DisplayName = "ItemName"),
-	LOCATION			UMETA(DisplayName = "Location"),
-	LEVEL				UMETA(DisplayName = "Level"),
-	LEVEL_NAME			UMETA(DisplayName = "LevelName")
-};
-
-UENUM(BlueprintType, Category = "FirebaseAnalytics")
-enum class EReservedEventsEnum : uint8
-{
-	ADD_PAYMENT_INFO		UMETA(DisplayName = "AddPaymentInfo"),
-    ADD_TO_CART				UMETA(DisplayName = "AddToCart"),
-    ADD_TO_WISHLIST			UMETA(DisplayName = "AddToWishlist"),
-    APP_OPEN				UMETA(DisplayName = "AppOpen"),
-    BEGIN_CHECKOUT			UMETA(DisplayName = "BeginCheckout"),
-    CAMPAIGN_DETAILS		UMETA(DisplayName = "CampaignDetails"),
-    ECOMMERCE_PURCHASE		UMETA(DisplayName = "EcommercePurchase"),
-    GENERATE_LEAD			UMETA(DisplayName = "GenerateLead"),
-    JOIN_GROUP				UMETA(DisplayName = "JoinGroup"),
-    LEVEL_END				UMETA(DisplayName = "LevelEnd"),
-    LEVEL_START				UMETA(DisplayName = "LevelStart"),
-    LEVEL_UP				UMETA(DisplayName = "LevelUp"),
-    LOGIN					UMETA(DisplayName = "Login"),
-    POST_SCORE				UMETA(DisplayName = "PostScore"),
-    PRESENT_OFFER			UMETA(DisplayName = "PresentOffer"),
-    PURCHASE_REFUND			UMETA(DisplayName = "PurchaseRefund"),
-    SEARCH					UMETA(DisplayName = "Search"),
-    SELECT_CONTENT			UMETA(DisplayName = "SelectContent"),
-    SHARE					UMETA(DisplayName = "Share"),
-    SIGN_UP					UMETA(DisplayName = "SignUp"),
-    SPEND_VIRTUAL_CURRENCY	UMETA(DisplayName = "SpendVirtualCurrency"),
-    TUTORIAL_BEGIN			UMETA(DisplayName = "TutorialBegin"),
-    TUTORIAL_COMPLETE		UMETA(DisplayName = "TutorialComplete"),
-    UNLOCK_ACHIEVEMENT		UMETA(DisplayName = "UnlockAchievment"),
-    VIEW_ITEM				UMETA(DisplayName = "ViewItem"),
-    VIEW_ITEM_LIST			UMETA(DisplayName = "ViewItemList"),
-    VIEW_SEARCH_RESULTS		UMETA(DisplayName = "ViewSearchResults"),
-    EARN_VIRTUAL_CURRENCY	UMETA(DisplayName = "EarnVirualCurrency"),
-    REMOVE_FROM_CART		UMETA(DisplayName = "RemoveFromCart"),
-    CHECKOUT_PROGRESS		UMETA(DisplayName = "CheckoutProgress"),
-    SET_CHECKOUT_OPTION		UMETA(DisplayName = "SetCheckoutOption")
-};
-
-UENUM(BlueprintType, Category = "FirebaseAnalytics")
-enum class EReservedUserPropertiesEnum : uint8
-{
-	SIGN_UP_METHOD						UMETA(DisplayName = "SignUpMethod"),
-	ALLOW_AD_PERSONALIZATION_SIGNALS	UMETA(DisplayName = "AllowPersonalizedAds")
-};
+#include "FirebaseAnalyticsLibrary.generated.h"
 
 USTRUCT(BlueprintType, Category = "FirebaseAnalytics|Bundle")
 struct FBundle
@@ -83,23 +17,14 @@ struct FBundle
 };
 
 UCLASS()
-class UAnalyticsBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
+class UFirebaseAnalyticsLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
 public:
-	/** Initialize the Analytics API.
-	 *	@param AppKey	API key used to authenticate requests from your app.
-	 *	@param AppID	App ID used to uniquely identify an instance of an app.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "FirebaseAnalytics")
-	static void Initialize(FString ApplicationID, FString APIKey,
-						   FString DatabaseURL, FString SenderID,
-						   FString StorageBucket, FString ProjectID);
-
 	/** Initialize the Analytics API. */
 	UFUNCTION(BlueprintCallable, Category = "FirebaseAnalytics")
-	static void InitializeFromConfig();
+	static void Initialize();
 
 	/** Log an event with associated parameters.
 	 *  @param EventName	Name of the event to log. Should contain 1 to 40 alphanumeric characters
@@ -212,14 +137,18 @@ public:
 	static void SetUserProperty(FString PropertyName, FString PropertyValue);
 
 	/** Add a string parameter to Bundle.
-	*  @param ParameterName	Name of the parameter to log.
-	*
-	*  @param ParameterValue	Value of the parameter to log.
-	*/
+	 *	@param Bundle			Bundle reference
+	 *
+	 *  @param ParameterName	Name of the parameter to log.
+	 *
+	 *  @param ParameterValue	Value of the parameter to log.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "FirebaseAnalytics|Bundle")
 	static void PutString(UPARAM(ref) FBundle& Bundle, FString ParameterName, FString ParameterValue);
 	
 	/** Add a floating point parameter to Bundle.
+	 *	@param Bundle			Bundle reference
+	 *
 	 *  @param ParameterName	Name of the parameter to log.
 	 *
 	 *  @param ParameterValue	Value of the parameter to log.
@@ -228,6 +157,8 @@ public:
 	static void PutFloat(UPARAM(ref) FBundle& Bundle, FString ParameterName, float ParameterValue);
 	
 	/** Add a integer parameter to Bundle.
+	 *	@param Bundle			Bundle reference
+	 *
 	 *  @param ParameterName	Name of the parameter to log.
 	 *
 	 *  @param ParameterValue	Value of the parameter to log.
