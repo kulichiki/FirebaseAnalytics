@@ -28,7 +28,7 @@
     <insert>
       dependencies
       {
-        classpath 'com.google.gms:google-services:4.0.0'
+          classpath 'com.google.gms:google-services:4.0.0'
       }
     </insert>
   </buildscriptGradleAdditions>
@@ -57,12 +57,16 @@
 
       private void AndroidThunkJava_LogEvent(String EventName)
       {
+          if (Analytics == null) return;
+      
           Bundle Parameters = new Bundle();
           Analytics.logEvent(EventName, Parameters);
       }
 
       private void AndroidThunkJava_LogEventWithParameter(String EventName, String ParameterName, String ParameterValue)
       {
+          if (Analytics == null) return;
+      
           Bundle Parameters = new Bundle();
           Parameters.putString(ParameterName, ParameterValue);
           Analytics.logEvent(EventName, Parameters);
@@ -70,6 +74,8 @@
 
       private void AndroidThunkJava_LogEventWithParameter(String EventName, String ParameterName, float ParameterValue)
       {
+          if (Analytics == null) return;
+      
           Bundle Parameters = new Bundle();
           Parameters.putFloat(ParameterName, ParameterValue);
           Analytics.logEvent(EventName, Parameters);
@@ -77,6 +83,8 @@
 
       private void AndroidThunkJava_LogEventWithParameter(String EventName, String ParameterName, int ParameterValue)
       {
+          if (Analytics == null) return;
+      
           Bundle Parameters = new Bundle();
           Parameters.putInt(ParameterName, ParameterValue);
           Analytics.logEvent(EventName, Parameters);
@@ -84,31 +92,37 @@
       
       private void AndroidThunkJava_LogEventWithParameters(String EventName, Bundle Parameters)
       {
+          if (Analytics == null) return;
           Analytics.logEvent(EventName, Parameters);
       }
 
       private void AndroidThunkJava_ResetAnalyticsData()
       {
+          if (Analytics == null) return;
           Analytics.resetAnalyticsData();
       }
 
       private void AndroidThunkJava_SetAnalyticsCollectionEnabled(boolean Enabled)
       {
+          if (Analytics == null) return;
           Analytics.setAnalyticsCollectionEnabled(Enabled);
       }
 
       private void AndroidThunkJava_SetSessionTimeoutDuration(int Milliseconds)
       {
+          if (Analytics == null) return;
           Analytics.setSessionTimeoutDuration(Milliseconds);
       }
 
       private void AndroidThunkJava_SetUserID(String UserID)
       {
+          if (Analytics == null) return;
           Analytics.setUserId(UserID);
       }
 
       private void AndroidThunkJava_SetUserProperty(String PropertyName, String PropertyValue)
       {
+          if (Analytics == null) return;
           Analytics.setUserProperty(PropertyName, PropertyValue);
       }
     </insert>
